@@ -411,13 +411,78 @@
 ;; Restrictions (please don't use these function(s)): interleave
 ;;
 
-(defn prob39 [] nil)
+(defn prob39 [[h1 & t1] [h2 & t2]]
+  (loop [acc [] h1 h1 t1 t1 h2 h2 t2 t2]
+    (cond
+      (or (nil? h1) (nil? h2)) (reverse (into '() acc))
+      :else (recur (conj (conj acc h1) h2)
+                   (first t1) (next t1)
+                   (first t2) (next t2)))))
+
+;; (prob39 [1 2 3] [:a :b :c])
+
+;; My actual solution
+;;
+(#(flatten (apply map list %&)) [1 2 3] [:a :b :c])
+
+;; Best solution, which is equivalent to min, but much shorter, from the site:
+;; mapcat list
 
 (defn prob39-test []
   (= (prob39 [1 2 3] [:a :b :c]) '(1 :a 2 :b 3 :c))
   (= (prob39 [1 2] [3 4 5 6]) '(1 3 2 4))
   (= (prob39 [1 2 3 4] [5]) [1 5])
   (= (prob39 [30 20] [25 15]) [30 25 20 15]))
+
+;; 4Clojure Question 40
+;;
+;; Write a function which separates the items of a sequence by an arbitrary value.
+;;
+;; Restrictions (please don't use these function(s)): interpose
+;;
+
+;; First pass - a recursice approach
+(defn prob40 [sep [h & t]]
+  (loop [acc [] h h t t]
+    (cond
+      (nil? t) (conj acc h)
+      :else (recur (conj (conj acc h) sep) (first t) (next t)))))
+
+;; more idiomatic - and my actual solution - looking at other soln.s
+;; I could have used *repeat* instead of (iterate identity x)
+(#(butlast (interleave %2 (iterate identity %1))) "a" "123")
+
+
+(defn prob40-test []
+  (= (prob40 0 [1 2 3]) [1 0 2 0 3])
+  (= (apply str (prob40 ", " ["one" "two" "three"])) "one, two, three")
+  (= (prob40 :z [:a :b :c :d]) [:a :z :b :z :c :z :d]))
+
+;; 4Clojure Question 41
+;;
+;; Write a function which drops every Nth item from a sequence.
+;;
+(defn prob41 [[h & t] n]
+  (loop [acc [] h h t t cnt n]
+    (cond
+      (nil? h) acc
+      :else (if (= 1 cnt)
+              (recur acc (first t) (next t) n)
+              (recur (conj acc h) (first t) (next t) (dec cnt))))))
+
+;; more idiomatic?
+(partition-all 3 [1 2 3 4 5])
+;; ((1 2 3) (4 5))
+(mapcat butlast (partition-all 3 [1 2 3 4 5]))
+;; (1 2 4)
+;; ((1 2) (4))
+(concat )
+
+
+(defn prob41-test []
+  (= (prob41 [1 2 3 4 5 6 7 8] 3) [1 2 4 5 7 8])
+  (= (prob41 [:a :b :c :d :e :f] 2) [:a :c :e])
+  (= (prob41 [1 2 3 4 5 6] 4) [1 2 3 5 6]))
 
 ;;;
 ;;; 83
