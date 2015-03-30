@@ -299,7 +299,7 @@
   (mapcat #(list % %) coll))
 
 ;; A nice solution from the site is:
-;; (fn [xs] (interlave xs xs))
+;; (fn [xs] (interleave xs xs))
 
 (defn prob32-test []
   (= (prob32 [1 2 3]) '(1 1 2 2 3 3))
@@ -476,13 +476,83 @@
 (mapcat butlast (partition-all 3 [1 2 3 4 5]))
 ;; (1 2 4)
 ;; ((1 2) (4))
-(concat )
-
+;; This is taken from the solutions on 4clojure and it seems to me
+;; to be the best way of doing it - the addition of a step that is one
+;; less than the partition size is nice
+(#(apply concat (partition-all (- %2 1) %2 %)) [1 2 3 4 5 6 7] 3)
 
 (defn prob41-test []
   (= (prob41 [1 2 3 4 5 6 7 8] 3) [1 2 4 5 7 8])
   (= (prob41 [:a :b :c :d :e :f] 2) [:a :c :e])
   (= (prob41 [1 2 3 4 5 6] 4) [1 2 3 5 6]))
+
+
+
+;; 4Clojure Question 42
+;;
+;; Write a function which calculates factorials.
+;;
+(defn prob42 [n]
+  ;; This is tail recursive - using an accumalator to tot up
+  ;; the total
+  (loop [acc 1 n n]
+    (if (= n 0)
+      acc
+      (recur (* acc n) (dec n)))))
+
+;; Try for a more idiomatic, and shorter, solution
+#(reduce * (range 1 (+ 1 %)))
+
+;; TODO - Should time the 2 differing approaches to see which runs faster
+;; range produces a lazy seq so it won't eat up memory (check this) so in
+;; I can't see that the shorter solution would be that much worse in terms
+;; of mem or time.
+
+(defn prob42-test []
+  (and
+   (= (prob42 1) 1)
+   (= (prob42 3) 6)
+   (= (prob42 5) 120)
+   (= (prob42 8) 40320)))
+
+;; 4Clojure Question 43
+;;
+;; Write a function which reverses the interleave process into x number of
+;; subsequences.
+;;
+
+;; First attempt - trying to write everything in a func form
+;;  / recursive form using as few clojure funcs as possible.
+;; TBH - this seems a little overly complex, even if it does
+;; work ;)
+(defn prob42 [coll x]
+  (let [init-acc (fn [x]
+                   (loop [acc [] x x]
+                     (if (= x 0)
+                       acc
+                       (recur (conj acc []) (dec x)))))
+        conj-result (fn [x idx coll]
+                      (loop [acc [] coll coll n 0]
+                        (if-let [h (first coll)]
+                          (if (= n idx)
+                            (recur (conj acc (conj h x)) (rest coll) (inc n))
+                            (recur (conj acc h) (rest coll) (inc n)))
+                          acc)))]
+    (loop [acc (init-acc x) coll coll idxs (cycle (range 0 x))]
+      (if-let [head (first coll)]
+        (recur (conj-result head (first idxs) acc) (rest coll) (rest idxs))
+        acc))))
+
+;; Second pass at improving my first solution
+
+(defn prob42-test []
+  (and
+   (= (prob42 [1 2 3 4 5 6] 2) '((1 3 5) (2 4 6)))
+   (= (prob42 (range 9) 3) '((0 3 6) (1 4 7) (2 5 8)))
+   (= (prob42 (range 10) 5) '((0 5) (1 6) (2 7) (3 8) (4 9)))))
+
+(prob42-test)
+
 
 ;;;
 ;;; 83
