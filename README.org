@@ -1,0 +1,15 @@
+#+BEGIN_SRC emacs-lisp
+  (message "Yeah!")
+#+END_SRC
+
+#+RESULTS:
+: Yeah!
+
+#+begin_src clojure :results silent
+  (ns fourclojure.examples)
+#+end_src
+
+
+#+begin_src clojure :results silent
+  (+ 1 5)
+#+end_src

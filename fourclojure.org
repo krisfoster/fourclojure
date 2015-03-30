@@ -1,0 +1,921 @@
+#+TITLE
+#+AUTHOR
+#+EMAIL
+#+LANGUAGE: en
+#+STARTUP: align indent fold nodlcheck hidestars oddeven lognotestate
+#+PROPERTY: tangle fourclojure.clj
+
+;;(ns fourclojure.core)
+
+* Introduction
+
+* Running the Code & Setup
+
+* Problems
+
+** 21
+
+*** Problem
+
+Write a function which returns the Nth element from a sequence.
+Restrictions (please don't use these function(s)): nth
+
+*** Solution(s)
+    #+name: problem-21
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob21 [coll idx]
+        (if (seq coll)
+          (if (= idx 0)
+            (first coll)
+            (recur (rest coll) (dec idx)))))
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-21-tests
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob21-test []
+        (and
+          (= (prob21 '(4 5 6 7) 2) 6)
+          (= (prob21 [:a :b :c] 0) :a)
+          (= (prob21 [1 2 3 4] 1) 2)
+          (= (prob21 '([1 2] [3 4] [5 6]) 2) [5 6])))
+    #+END_SRC
+
+** 22
+
+*** Problem
+
+Write a function which returns the total number of elements in a sequence.
+Restrictions (please don't use these function(s)): count
+
+*** Solution(s)
+
+A pretty straight-forward functional solution.
+
+    #+name: problem-22
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+    (defn prob22 [coll]
+      (loop [coll coll cnt 0]
+        (if (seq coll)
+          (recur (rest coll) (inc cnt))
+          cnt)))
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-22-tests
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob22-test []
+        (and
+          (= (prob22 '(1 2 3 3 1)) 5)
+          (= (prob22 "Hello World") 11)
+          (= (prob22 [[1 2] [3 4] [5 6]]) 3)
+          (= (prob22 '(13)) 1)
+          (= (prob22 '(:a :b :c)) 3)))
+    #+END_SRC
+
+** 23
+
+*** Problem
+
+Write a function which reverses a sequence.
+Restrictions (please don't use these function(s)): reverse, rseq
+
+*** Solution(s)
+
+I have tried a few different ways of solving this one here.
+
+First is a solution using loop recur, so it is TCO-ed. I think
+that this is the solution that I posted to *4clojure*. I also
+am using a list - so the reslut of =conj=-ing will be to add to the
+head of the list, which has the effect of reversing the input list
+as the item we add to the output list first will end up at the end
+of the list.
+
+    #+name: problem-23-with-tco
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob23 [coll]
+        (loop [ncoll () coll coll]
+          (if (seq coll)
+            (recur (conj ncoll (first coll)) (rest coll))
+            ncoll)))
+    #+END_SRC
+
+The I thought I would try writting a naive recursive solution with
+no TCO. This uses =conj= just as the previous example does. The result
+of =conj=-ing to a =seq= is the same as =conj=-ing to a list. It doesn't
+matter if the input to the =seq= is an =array=, which =conj=-ed to at the
+end and would preserve the order of the input list.
+
+    #+name: problem-23-without-tco-1
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob23-non-tco-1 [coll]
+        (if (seq coll)
+          (conj
+           (prob23-non-tco-1 (next coll))
+           (first coll))
+          []))
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-23-tests
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob23-test []
+        (and
+         (= (prob23 [1 2 3 4 5]) [5 4 3 2 1])
+         (= (prob23 (sorted-set 5 7 2 7)) '(7 5 2))
+         (= (prob23 [[1 2][3 4][5 6]]) [[5 6][3 4][1 2]])))
+    #+END_SRC
+
+** 24
+
+*** Problem
+
+Write a function which returns the sum of a sequence of numbers.
+
+*** Solution(s)
+
+Hopefuly idiomatic, and short, solution.
+
+    #+name: problem-24
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob24 [coll]
+        (reduce + 0 coll))
+    #+END_SRC
+
+My actual posted solution was (I wrapped thsi in a function def
+for ease of making this doc =tangle=-able):
+
+    #+name: problem-24-actual
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (reduce + 0 coll)
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-24-tests
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob24-test []
+        (and
+         (= (prob24 [1 2 3]) 6)
+         (= (prob24 (list 0 -2 5 5)) 8)
+         (= (prob24 #{4 2 1}) 7)
+         (= (prob24 '(0 0 -1)) -1)
+         (= (prob24 '(1 10 3)) 14)))
+    #+END_SRC
+
+** 25
+
+*** Problem
+
+Write a function which returns only the odd numbers from a sequence.
+
+*** Solution(s)
+
+    #+name: problem-25
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob25 [coll]
+        (filter odd? coll))
+    #+END_SRC
+
+My actual posted solution was (I wrapped thsi in a function def
+for ease of making this doc =tangle=-able):
+
+    #+name: problem-25-actual
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (filter odd? coll)
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-25-tests
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob25-test []
+        (and
+         (= (prob25 #{1 2 3 4 5}) '(1 3 5))
+         (= (prob25 [4 2 1 6]) '(1))
+         (= (prob25 [2 2 4 6]) '())
+         (= (prob25 [1 1 1 3]) '(1 1 1 3))))
+    #+END_SRC
+
+** 26
+
+*** Problem
+
+Write a function which returns the first X fibonacci numbers.
+
+*** Solution(s)
+
+My first go at this was delibaretly naive and uses plain function
+recursion.
+
+    #+name: problem-26-naive
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob26-fib-naive [x]
+        (cond
+          (= x 1) 1
+          (= x 2) 1
+          :else (+ (prob26 (dec (dec x)))
+                   (prob26 (dec x)))))
+    #+END_SRC
+
+Next go uses recur (TCO) so shouldn't blow the stack for large =x=.
+
+    #+name: problem-26-with-tco-0
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob26-fib-tco-0 [x]
+        (if (< x 2)
+          1
+          (let [fib (fn fib [a b n]
+                      (if (= n 2)
+                        (+ a b)
+                        (recur b (+ a b) (dec n))))]
+            (fib 0 1 x))))
+    #+END_SRC
+
+I then tried to improve on this for really large =x= by using
+=bigint= to ensure that we use big integers throught out and
+memoization to improve speed (at cost of memory).
+
+Note that the main function just returns the fibonacci number for =x=
+so we need to map this across the input range to get a sequence of the
+fibncci numbers out.
+
+    #+name: problem-26-with-tco-1
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob26-fib-tco-1 [x]
+        (if (< x 2)
+          1
+          (loop [a (bigint 0) b (bigint 1) n x]
+            (if (= n 2)
+              (+ a b)
+              (recur b (+ a b) (dec n))))))
+
+      (def prob26-fib-tco-2
+        (memoize prob26-fib-tco-1))
+
+      (map prob26-fib-tco-2 (range 100))
+    #+END_SRC
+
+Then finaly try and improve a little more by using rolling the
+previous code into a single function def.
+
+    #+name: problem-26-final
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob26 [x]
+        (let [f (fn [x]
+                  (if (< x 2)
+                    1
+                    (loop [a (bigint 1) b (bigint 1) n x]
+                      (if (= n 2)
+                        (+ a b)
+                        (recur b (+ a b) (dec n))))))
+              mf (memoize f)]
+          (map mf (range x))))
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-26-tests
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob26-test []
+        (and
+         (= (prob26 3) '(1 1 2))
+         (= (prob26 6) '(1 1 2 3 5 8))
+         (= (prob26 8) '(1 1 2 3 5 8 13 21))))
+    #+END_SRC
+
+** 27
+
+*** Problem
+
+    Write a function which returns true if the given sequence is a palindrome.
+    Hint: "racecar" does not equal '(\r \a \c \e \c \a \r)
+
+*** Solutions
+
+   #+name: problem-27
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob27 [coll]
+       (= (seq coll) (reverse coll)))
+   #+END_SRC
+
+My actual solution posted was the above minus the wrapping =defn=:
+
+   #+name: problem-27
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     #(= (seq %) (reverse %))
+   #+END_SRC
+
+*** Tests
+
+   #+name: problem-27-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob27-test []
+       (and
+         (false? (prob27 '(1 2 3 4 5)))
+         (true? (prob27 "racecar"))
+         (true? (prob27 [:foo :bar :foo]))
+         (true? (prob27 '(1 1 3 3 1 1)))
+         (false? (prob27 '(:a :b :c)))))
+   #+END_SRC
+
+** 28
+
+*** Problem
+
+    Write a function which flattens a sequence.
+    Restrictions (please don't use these function(s)): flatten
+
+*** Solution(s)
+
+    First attempt at this. This will likely blow the stack for
+    complicated input lists.
+
+    #+name: problem-28-attempt-0
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob28-helper [acc coll]
+       (let [head (first coll)
+             tail (next coll)]
+         (cond
+           (nil? head) acc
+           (sequential? head) (prob28-helper (prob28-helper acc head) tail)
+           :else (prob28-helper (conj acc head) tail))))
+
+     (defn prob28-first [coll]
+       (prob28-helper [] coll))
+    #+END_SRC
+
+    Second attempt that tries to combine the above 2 functions into
+    a single definition
+
+   #+name: problem-28-attempt-1
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob28 [coll]
+       (let [helper (fn helper [acc coll]
+                      (let [head (first coll)
+                            tail (next coll)]
+                        (cond
+                          (nil? head) acc
+                          (sequential? head) (helper (helper acc head) tail)
+                          :else (helper (conj acc head) tail))))]
+         (helper [] coll)))
+    #+END_SRC
+
+    The following is maximental's soln. from the site - whioh is nice
+    particularly like the destructing args for head and tail
+
+   #+name: problem-28-maximental
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn f [[h & t]]
+       (if h
+         ;; Should this be sequential? instead?
+         (if (coll? h)
+           (concat (f h) (f t))
+           (cons h (f t)))))
+    #+END_SRC
+
+    And I also like immo's soln. - which is very succinct.
+
+   #+name: problem-28-imo
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn ff [x]
+       (if (coll? x) (mapcat ff x) [x]))
+    #+END_SRC
+
+*** Tests
+
+   #+name: problem-28-imo
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob28-test []
+       (and
+        (= (prob28 '((1 2) 3 [4 [5 6]])) '(1 2 3 4 5 6))
+        (= (prob28 ["a" ["b"] "c"]) '("a" "b" "c"))
+        (= (prob28 '((((:a))))) '(:a))))
+    #+END_SRC
+
+***
+** 29
+
+*** Problem
+
+    Write a function which takes a string and returns a new string containing
+    only the capital letters.
+
+*** Solution(s)
+
+   #+name: problem-28-29
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob29 [coll]
+       (apply str (filter #(Character/isUpperCase %) coll)))
+    #+END_SRC
+
+*** Tests
+
+   #+name: problem-29-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob29-test []
+       (= (prob29 "HeLlO, WoRlD!") "HLOWRD")
+       (empty? (prob29 "nothing"))
+       (= (prob29 "$#A(*&987Zf") "AZ"))
+    #+END_SRC
+
+*** 30
+
+*** Problem
+
+    Write a function which removes consecutive duplicates from a sequence.
+
+*** Solution(s)
+
+   #+name: problem-30
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     ;; Following is a very functional way of solving this.
+     (defn prob30 [coll]
+       (loop [acc [] old-head "" [h & t] coll]
+         (cond
+           (nil? h) acc
+           (= old-head h) (recur acc h t)
+           :else (recur (conj acc h) h t))))
+    #+END_SRC
+
+    Is there a more idiomatic clojure way? Why yes - and the
+    following more idomatic way is taken from Grimoire
+
+   #+name: problem-30-idomatic
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob28-idiomatic [coll]
+       (map last (partition-by identity coll)))
+    #+END_SRC
+
+*** Tests
+
+   #+name: problem-30-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob30-test []
+       (= (apply str (prob30 "Leeeeeerrroyyy")) "Leroy")
+       (= (prob30 [1 1 2 3 3 2 2 3]) '(1 2 3 2 3))
+       (= (prob30 [[1 2] [1 2] [3 4] [1 2]]) '([1 2] [3 4] [1 2])))
+    #+END_SRC
+
+** 31
+
+*** Problem
+
+    Write a function which packs consecutive duplicates into sub-lists.
+
+*** Solution(s)
+
+   #+name: problem-31
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob31 [coll]
+       (partition-by identity coll))
+    #+END_SRC
+
+    My actual solution on 4clojure is:
+
+   #+name: problem-31
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (partial partition-by identity)
+    #+END_SRC
+
+*** Tests
+
+   #+name: problem-31-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob31-test []
+       (= (prob31 [1 1 2 1 1 1 3 3]) '((1 1) (2) (1 1 1) (3 3)))
+       (= (prob31 [:a :a :b :b :c]) '((:a :a) (:b :b) (:c)))
+       (= (prob31 [[1 2] [1 2] [3 4]]) '(([1 2] [1 2]) ([3 4]))))
+    #+END_SRC
+
+** 32
+
+*** Problem
+    Write a function which duplicates each element of a sequence.
+
+*** Solution(s)
+
+   #+name: problem-32
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob32 [coll]
+       (mapcat #(list % %) coll))
+    #+END_SRC
+
+    A nice solution taken from the site, i.e. this is not my own,  is:
+
+   #+name: problem-32-stolen
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (fn [xs] (interleave xs xs))
+    #+END_SRC
+
+*** Tests
+
+   #+name: problem-32-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob32-test []
+       (= (prob32 [1 2 3]) '(1 1 2 2 3 3))
+       (= (prob32 [:a :a :b :b]) '(:a :a :a :a :b :b :b :b))
+       (= (prob32 [[1 2] [3 4]]) '([1 2] [1 2] [3 4] [3 4]))
+       (= (prob32 [[1 2] [3 4]]) '([1 2] [1 2] [3 4] [3 4])))
+    #+END_SRC
+
+** 33
+
+*** Problem
+
+    Write a function which replicates each element of a sequence a variable
+    number of times.
+
+*** Solution(s)
+
+   #+name: problem-33
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob33 [coll times]
+       (mapcat #(take times (repeat %)) coll))
+    #+END_SRC
+
+    My actual posted solution is:
+
+   #+name: problem-33-actual
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (fn f [xs x] (mapcat #(take x (repeat %)) xs))
+   #+END_SRC
+
+*** Tests
+
+   #+name: problem-33-actual
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob33-test []
+       (= (prob33 [1 2 3] 2) '(1 1 2 2 3 3))
+       (= (prob33 [:a :b] 4) '(:a :a :a :a :b :b :b :b))
+       (= (prob33 [4 5 6] 1) '(4 5 6))
+       (= (prob33 [[1 2] [3 4]] 2) '([1 2] [1 2] [3 4] [3 4]))
+       (= (prob33 [44 33] 2) [44 44 33 33]))
+   #+END_SRC
+
+** 34
+
+*** Problem
+
+    Write a function which creates a list of all integers in a given range.
+    Restrictions (please don't use these function(s)): range
+
+*** Solution(s)
+
+   #+name: problem-34
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob34 [low hi]
+       (take (- hi low) (iterate inc low)))
+   #+END_SRC
+
+    A more recursive / functional solution would be:
+
+   #+name: problem-34-recursive
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob34-func [lo hi]
+       (loop [acc '() cnt (- hi lo) x (- hi 1)]
+         (cond
+           (<= cnt 0) acc
+           :else (recur (cons x acc) (dec cnt) (dec x)))))
+    #+END_SRC
+
+*** Tests
+
+   #+name: problem-34-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob34-test []
+       (= (prob34-func 1 4) '(1 2 3))
+       (= (prob34-func -2 2) '(-2 -1 0 1))
+       (= (prob34-func 5 8) '(5 6 7)))
+   #+END_SRC
+
+** 35
+
+*** Problem
+
+   Clojure lets you give local names to values using the special let-form.
+
+***  Solution(s)
+
+   #+name: problem-35
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (def prob35 7)
+   #+END_SRC
+
+*** Tests
+
+   #+name: problem-35-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob35-test []
+       (= prob35 (let [x 5] (+ 2 x)))
+       (= prob35 (let [x 3, y 10] (- y x)))
+       (= prob35 (let [x 21] (let [y 3] (/ x y)))))
+   #+END_SRC
+
+** 36
+
+*** Problem
+
+    Can you bind x, y, and z so that these are all true?
+
+*** Solution(s)
+
+   #+name: problem-36
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob36-test []
+       (= 10 (let [x 7 y 3 z 1] (+ x y)))
+       (= 4 (let  [x 7 y 3 z 1] (+ y z)))
+       (= 1 (let  [x 7 y 3 z 1] z)))
+   #+END_SRC
+
+** 37
+
+*** Problem
+
+    Regex patterns are supported with a special reader macro.
+
+*** Solution
+
+   #+name: problem-37
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (= "ABC" (apply str (re-seq #"[A-Z]+" "bA1B3Ce ")))
+   #+END_SRC
+
+** 38
+
+*** Problem
+
+   Write a function which takes a variable number of parameters and returns the
+   maximum value.
+
+   Restrictions (please don't use these function(s)): max, max-key
+
+*** Solution(s)
+
+    My recursive solution to the problem:
+
+   #+name: problem-38-recursive
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob38-func
+       ([x] x)
+       ([x & xs]
+        (loop [max x head x xs xs]
+          (cond
+            (nil? head) max
+            (> head max) (recur head (first xs) (rest xs))
+            :else (recur max (first xs) (rest xs))))))
+   #+END_SRC
+
+    And the actual soln I posted - maybe a little more idiomatic?
+
+   #+name: problem-38-actual
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob38 [& args]
+       (first (apply sorted-set-by > args)))
+   #+END_SRC
+
+*** Tests
+
+   #+name: problem-38-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob38-test []
+       (= (prob38 1 8 3 4) 8)
+       (= (prob38 30 20) 30)
+       (= (prob38 45 67 11) 67))
+   #+END_SRC
+
+** 39
+
+*** Problem
+
+   Write a function which takes two sequences and returns the first item from
+   each, then the second item from each, then the third, etc.
+
+   Restrictions (please don't use these function(s)): interleave
+
+*** Solution(s)
+
+   #+name: problem-39-recursive
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob39 [[h1 & t1] [h2 & t2]]
+       (loop [acc [] h1 h1 t1 t1 h2 h2 t2 t2]
+         (cond
+           (or (nil? h1) (nil? h2)) (reverse (into '() acc))
+           :else (recur (conj (conj acc h1) h2)
+                        (first t1) (next t1)
+                        (first t2) (next t2)))))
+   #+END_SRC
+
+    My actual solution - which is more idomatic and is certainly shorter:
+
+   #+name: problem-39-actual
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     #(flatten (apply map list %&))
+
+     ;; e.g.
+     ;;(#(flatten (apply map list %&)) [1 2 3] [:a :b :c])
+   #+END_SRC
+
+
+   The best solution, which is equivalent to mine, but much shorter, which is
+   taken from the site:
+   #+name: problem-39-best
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     mapcat list
+   #+END_SRC
+
+*** Tests
+
+   #+name: problem-39-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob39-test []
+       (= (prob39 [1 2 3] [:a :b :c]) '(1 :a 2 :b 3 :c))
+       (= (prob39 [1 2] [3 4 5 6]) '(1 3 2 4))
+       (= (prob39 [1 2 3 4] [5]) [1 5])
+       (= (prob39 [30 20] [25 15]) [30 25 20 15]))
+   #+END_SRC
+
+** 40
+
+*** Problem
+
+    Write a function which separates the items of a sequence by an arbitrary value.
+
+    Restrictions (please don't use these function(s)): interpose
+
+*** Solution(s)
+
+    My initial recursive approach to solving this:
+
+   #+name: problem-40-recursive
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     ;; First pass - a recursice approach
+     (defn prob40 [sep [h & t]]
+       (loop [acc [] h h t t]
+         (cond
+           (nil? t) (conj acc h)
+           :else (recur (conj (conj acc h) sep) (first t) (next t)))))
+   #+END_SRC
+
+   The following is more idiomatic - and my actual solution. Looking at other
+   soln.s I could have used =repeat= instead of =(iterate identity x)= which
+   is much more clear and certainly succinct.
+
+   #+name: problem-40-actual
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (#(butlast (interleave %2 (iterate identity %1))) "a" "123")
+   #+END_SRC
+
+*** Tests
+
+   #+name: problem-40-tests
+   #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob40-test []
+       (= (prob40 0 [1 2 3]) [1 0 2 0 3])
+       (= (apply str (prob40 ", " ["one" "two" "three"])) "one, two, three")
+       (= (prob40 :z [:a :b :c :d]) [:a :z :b :z :c :z :d]))
+   #+END_SRC
+
+** 41
+
+*** Problem
+
+    Write a function which drops every Nth item from a sequence.
+
+*** Solution(s)
+
+    My initial, as usualm recurisve attempt:
+
+    #+name: problem-41-recursive
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (defn prob41 [[h & t] n]
+       (loop [acc [] h h t t cnt n]
+         (cond
+           (nil? h) acc
+           :else (if (= 1 cnt)
+                   (recur acc (first t) (next t) n)
+                   (recur (conj acc h) (first t) (next t) (dec cnt))))))
+    #+END_SRC
+
+    Then for a more idiomatic solution - which is the one I posted:
+
+    #+name: problem-41-actual
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+     (partition-all 3 [1 2 3 4 5])
+     ;; ((1 2 3) (4 5))
+
+      ;; My actual solution I posted.
+     (mapcat butlast (partition-all 3 [1 2 3 4 5]))
+    #+END_SRC
+
+    This is taken from the solutions on 4clojure and it seems to me
+    to be the best way of doing it - the addition of a step that is one
+    less than the partition size is nice
+
+    #+name: problem-40-stolen
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (#(apply concat (partition-all (- %2 1) %2 %)) [1 2 3 4 5 6 7] 3)
+    #+END_SRC
+
+*** Tests
+
+    #+name: problem-40-stolen
+    #+BEGIN_SRC clojure :exports code :results silent :session s1
+      (defn prob41-test []
+        (= (prob41 [1 2 3 4 5 6 7 8] 3) [1 2 4 5 7 8])
+        (= (prob41 [:a :b :c :d :e :f] 2) [:a :c :e])
+        (= (prob41 [1 2 3 4 5 6] 4) [1 2 3 5 6]))
+    #+END_SRC
+
+** 42
+
+*** Problem
+
+;; 4Clojure Question 42
+;;
+;; Write a function which calculates factorials.
+;;
+(defn prob42 [n]
+  ;; This is tail recursive - using an accumalator to tot up
+  ;; the total
+  (loop [acc 1 n n]
+    (if (= n 0)
+      acc
+      (recur (* acc n) (dec n)))))
+
+;; Try for a more idiomatic, and shorter, solution
+#(reduce * (range 1 (+ 1 %)))
+
+;; TODO - Should time the 2 differing approaches to see which runs faster
+;; range produces a lazy seq so it won't eat up memory (check this) so in
+;; I can't see that the shorter solution would be that much worse in terms
+;; of mem or time.
+
+(defn prob42-test []
+  (and
+   (= (prob42 1) 1)
+   (= (prob42 3) 6)
+   (= (prob42 5) 120)
+   (= (prob42 8) 40320)))
+
+;; 4Clojure Question 43
+;;
+;; Write a function which reverses the interleave process into x number of
+;; subsequences.
+;;
+
+;; First attempt - trying to write everything in a func form
+;;  / recursive form using as few clojure funcs as possible.
+;; TBH - this seems a little overly complex, even if it does
+;; work ;)
+(defn prob42 [coll x]
+  (let [init-acc (fn [x]
+                   (loop [acc [] x x]
+                     (if (= x 0)
+                       acc
+                       (recur (conj acc []) (dec x)))))
+        conj-result (fn [x idx coll]
+                      (loop [acc [] coll coll n 0]
+                        (if-let [h (first coll)]
+                          (if (= n idx)
+                            (recur (conj acc (conj h x)) (rest coll) (inc n))
+                            (recur (conj acc h) (rest coll) (inc n)))
+                          acc)))]
+    (loop [acc (init-acc x) coll coll idxs (cycle (range 0 x))]
+      (if-let [head (first coll)]
+        (recur (conj-result head (first idxs) acc) (rest coll) (rest idxs))
+        acc))))
+
+;; Second pass at improving my first solution
+
+(defn prob42-test []
+  (and
+   (= (prob42 [1 2 3 4 5 6] 2) '((1 3 5) (2 4 6)))
+   (= (prob42 (range 9) 3) '((0 3 6) (1 4 7) (2 5 8)))
+   (= (prob42 (range 10) 5) '((0 5) (1 6) (2 7) (3 8) (4 9)))))
+
+(prob42-test)
+
+
+;;;
+;;; 83
+;;;
+
+(defn prob83
+  ([] false)
+  ([x] false)
+  ([x & xs]
+   (and (not (every? true? (cons x xs)))
+        (not (every? false? (cons x xs))))))
+
+(defn prob83-test []
+  (and
+   (= false (prob83 false false))
+   (= true (prob83 true false))
+   (= false (prob83 true))
+   (= true (prob83 false true false))
+   (= false (prob83 true true true))
+   (= true (prob83 true true true false))))
